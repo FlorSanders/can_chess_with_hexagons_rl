@@ -5,6 +5,7 @@ class Piece:
         # Piece representation
         self.symbol = "?"
         self.name = "unknown"
+        self.index = -1
 
         # Piece properties
         self.is_white = is_white
@@ -61,6 +62,7 @@ class Pawn(Piece):
         super().__init__(is_white=is_white)
         self.symbol = "P"
         self.name = "pawn"
+        self.index = 0
 
     def get_legal_moves(self, board, position_from):
         """
@@ -125,6 +127,7 @@ class Rook(Piece):
         super().__init__(is_white=is_white)
         self.symbol = "R"
         self.name = "rook"
+        self.index = 3
 
     def get_legal_moves(self, board, position_from):
         """
@@ -174,6 +177,7 @@ class Knight(Piece):
         super().__init__(is_white=is_white)
         self.symbol = "N"
         self.name = "knight"
+        self.index = 2
 
     def get_legal_moves(self, board, position_from):
         """
@@ -231,6 +235,7 @@ class Bishop(Piece):
         super().__init__(is_white=is_white)
         self.symbol = "B"
         self.name = "bishop"
+        self.index = 1
 
     def get_legal_moves(self, board, position_from):
         """
@@ -280,6 +285,7 @@ class King(Piece):
         super().__init__(is_white=is_white)
         self.symbol = "K"
         self.name = "king"
+        self.index = 5
 
     def get_legal_moves(self, board, position_from):
         """
@@ -296,12 +302,12 @@ class King(Piece):
 
                 # Break if position isn't on the board
                 if position_to is None:
-                    break
+                    continue
 
                 # Break if move is self capture
                 piece_to = board.board[position_to]
                 if piece_to is not None and piece_to.is_white == self.is_white:
-                    break
+                    continue
 
                 # Add move to legal moves
                 legal_moves.append(position_to)
@@ -315,12 +321,12 @@ class King(Piece):
 
                 # Break if position isn't on the board
                 if position_to is None:
-                    break
+                    continue
 
                 # Break if move is self capture
                 piece_to = board.board[position_to]
                 if piece_to is not None and piece_to.is_white == self.is_white:
-                    break
+                    continue
 
                 # Add move to legal moves
                 legal_moves.append(position_to)
@@ -338,6 +344,7 @@ class Queen(Piece):
         super().__init__(is_white=is_white)
         self.symbol = "Q"
         self.name = "queen"
+        self.index = 4
 
     def get_legal_moves(self, board, position_from):
         """

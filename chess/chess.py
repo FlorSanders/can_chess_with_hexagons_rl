@@ -24,15 +24,15 @@ class Chess:
     def _setup_game(self):
         # Start PyGame
         pygame.init()
-        self.screen_w, self.screen_h = 1200, 800
+        self.screen_w, self.screen_h = 1200, 900
         self.screen = pygame.display.set_mode((self.screen_w, self.screen_h))
         pygame.display.set_caption("Can Chess With Hexagons?")
         self.timer = pygame.time.Clock()
         self.fps = 15
 
         # Define fonts
-        self.text_font = pygame.font.SysFont("Fira Sans Medium", 20)
-        self.title_font = pygame.font.SysFont("Fira Sans Medium", 20)
+        self.text_font = pygame.font.SysFont("Fira Sans Medium", 35)
+        self.title_font = pygame.font.SysFont("Fira Sans Medium", 50)
 
         # Define element sizes
         self.asset_size = 50
@@ -81,6 +81,20 @@ class Chess:
         return x_c, y_c
 
     def draw_board(self):
+        # Draw title above the board
+        title = self.title_font.render("Can Chess With Hexagons?", True, "black")
+        self.screen.blit(
+            title,
+            (self.screen_w / 2 - title.get_rect()[2] / 2, 25),
+        )
+        status_color = "White" if self.is_white else "Black"
+        subtitle = self.text_font.render(f"{status_color} to move", True, "black")
+        self.screen.blit(
+            subtitle,
+            (self.screen_w / 2 - subtitle.get_rect()[2] / 2, 75),
+        )
+
+        # Draw board hexagons and pieces
         board = self.board
         board_content = board.board
         q_min, q_max = board.get_coordinate_range()
@@ -101,6 +115,31 @@ class Chess:
                 piece = board_content[(q, r)]
                 if piece is not None:
                     self._draw_piece(piece, x_c, y_c)
+
+        # Draw captured pieces
+        white_captures_label = self.text_font.render("White captures", True, "black")
+        self.screen.blit(
+            white_captures_label,
+            (25, self.screen_h - white_captures_label.get_rect()[3] - 75),
+        )
+        white_captures = self.board.captures[0]
+        for i, piece in enumerate(sorted(white_captures, key=lambda x: x.index)):
+            x_c = 35 + i * (35 + 5)
+            y_c = self.screen_h - 50
+            self._draw_piece(piece, x_c, y_c)
+        black_captures_label = self.text_font.render("Black captures", True, "black")
+        self.screen.blit(
+            black_captures_label,
+            (
+                self.screen_w - black_captures_label.get_rect()[2] - 25,
+                self.screen_h - black_captures_label.get_rect()[3] - 75,
+            ),
+        )
+        black_captures = self.board.captures[1]
+        for i, piece in enumerate(sorted(black_captures, key=lambda x: x.index)):
+            x_c = self.screen_w - 35 - i * (35 + 5)
+            y_c = self.screen_h - 50
+            self._draw_piece(piece, x_c, y_c)
 
     def handle_game_event(self, event):
         if event.type == pygame.QUIT:
@@ -162,7 +201,7 @@ class Chess:
             # Remove everything from screen
             pygame.display.flip()
 
-        # Quit gameß
+        # Quit game
         pygame.quit()
 
 
