@@ -236,11 +236,11 @@ class HexChessBoard:
             ), "Self-captures are not allowed!"
 
             # Capture the piece
-            captured_piece.captured = True
-            self.captured_pieces[captured_piece.is_white].append(captured_piece)
+            piece_to.captured = True
+            self.captures[piece_to.is_white].append(piece_to)
 
             # Check if the game is finished
-            if isinstance(captured_piece, King):
+            if isinstance(piece_to, King):
                 finished = True
 
             # Remove the captured piece from the board
