@@ -102,9 +102,9 @@ class Pawn(Piece):
             # Move along axis
             position_to = board.move_along_axis(position_from, axis, -sign)
 
-            # Break if position isn't on the board
+            # Continue if position isn't on the board
             if position_to is None:
-                break
+                continue
 
             # Add move if it results in capture
             piece_to = board.board[position_to]
