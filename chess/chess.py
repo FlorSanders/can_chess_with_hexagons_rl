@@ -2,7 +2,7 @@ import pygame
 import math
 from board import HexChessBoard
 from utils import hexagon_dimensions, hexagon_points, qr_to_xy, xy_to_qr
-from players import RandomPlayer
+from players import RandomPlayer, GreedyPlayer
 import random
 
 
@@ -360,8 +360,13 @@ class Chess:
 
         # Initialize NPC if single player game
         if not self.two_player:
-            # TODO: implement difficulties
-            self.npc = RandomPlayer(self.board, not self.player_is_white)
+            # TODO: Implement difficulty properly
+            if self.difficulty == 0:
+                # Random Player
+                self.npc = RandomPlayer(self.board, not self.player_is_white)
+            else:
+                # Greedy Player
+                self.npc = GreedyPlayer(self.board, not self.player_is_white)
 
         # Start playing
         self.set_state("playing")
