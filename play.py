@@ -1,4 +1,4 @@
-from chess import Game
+from hexchess import Game
 
 
 if __name__ == "__main__":

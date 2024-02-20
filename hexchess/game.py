@@ -2,9 +2,9 @@ import pygame
 import math
 import random
 import os
-from chess.board import HexChessBoard
-from chess.utils import hexagon_dimensions, hexagon_points, qr_to_xy, xy_to_qr
-from chess.players import RandomPlayer, GreedyPlayer
+from hexchess.board import HexChessBoard
+from hexchess.utils import hexagon_dimensions, hexagon_points, qr_to_xy, xy_to_qr
+from hexchess.players import RandomPlayer, GreedyPlayer
 
 
 class Game:

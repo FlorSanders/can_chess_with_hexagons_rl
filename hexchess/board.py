@@ -1,4 +1,4 @@
-from chess.pieces import Pawn, Rook, Knight, Bishop, Queen, King
+from hexchess.pieces import Pawn, Rook, Knight, Bishop, Queen, King
 
 
 class HexChessBoard:
