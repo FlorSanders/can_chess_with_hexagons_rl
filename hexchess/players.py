@@ -34,7 +34,7 @@ class RandomPlayer(Player):
 class GreedyPlayer(Player):
     """
     Players performing greedy moves.
-    If a capture is possible, it is performed.
+    If a capture is possible, the piece with the maximum value is captured.
     Otherwise, a random move is performed.
     ---
     """
@@ -44,17 +44,21 @@ class GreedyPlayer(Player):
         legal_moves = self.get_legal_moves()
 
         # Collect moves that capture pieces
-        catch_moves = []
+        best_catch_move = None
+        best_catch_value = 0
         for position_from, position_to in legal_moves:
             # Check if move captures a piece
             piece_to = self.board.board[position_to]
-            if piece_to is not None and piece_to.is_white != self.is_white:
-                catch_moves.append((position_from, position_to))
+            if piece_to is None or piece_to.is_white == self.is_white:
+                continue
+            if piece_to.value > best_catch_value:
+                best_catch_value = piece_to.value
+                best_catch_move = (position_from, position_to)
 
         # Pick move
-        if len(catch_moves):
+        if best_catch_move is not None:
             # Catch piece if possible
-            return random.choice(catch_moves)
+            return best_catch_move
         else:
             # Move randomly
             return random.choice(legal_moves)

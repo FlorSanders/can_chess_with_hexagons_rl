@@ -246,7 +246,7 @@ class Game:
         self.draw_title()
         assert menu in [1, 2], f"Unknown menu {menu}"
         button_labels = (
-            ["white", "black", "random"] if menu == 1 else ["easy", "medium", "hard"]
+            ["easy", "medium", "hard"] if menu == 1 else ["white", "black", "random"]
         )
         button_ys = [self.btn_om1_y, self.btn_o0_y, self.btn_op1_y]
         for label, btn_y in zip(button_labels, button_ys):
