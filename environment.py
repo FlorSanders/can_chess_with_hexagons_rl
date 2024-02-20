@@ -160,7 +160,9 @@ class HexChessEnv:
         # Determine reward
         reward = 0
         if success:
-            reward = capture_reward
+            reward += capture_reward
+        else:
+            return self.get_state(), 0, finished
 
         # Perform opponent action if game is not finished
         if not finished:
@@ -169,9 +171,17 @@ class HexChessEnv:
             while not opponent_success:
                 # Get opponent action
                 position_from, position_to = self.opponent.get_move()
+                # Compute capture_reward
+                opponent_capture_reward = 0
+                piece_to = self.board.board[position_to]
+                if piece_to is not None and piece_to.is_white != self.opponent_is_white:
+                    opponent_capture_reward = piece_to.value
+                # Perform action
                 opponent_success, finished = self.board.move(
                     position_from, position_to, self.opponent_is_white
                 )
+            # Perform punishment if own piece is captured
+            reward -= opponent_capture_reward
 
         # Return update info
         newstate = self.get_state()
