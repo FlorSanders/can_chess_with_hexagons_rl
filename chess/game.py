@@ -1,12 +1,13 @@
 import pygame
 import math
-from board import HexChessBoard
-from utils import hexagon_dimensions, hexagon_points, qr_to_xy, xy_to_qr
-from players import RandomPlayer, GreedyPlayer
 import random
+import os
+from chess.board import HexChessBoard
+from chess.utils import hexagon_dimensions, hexagon_points, qr_to_xy, xy_to_qr
+from chess.players import RandomPlayer, GreedyPlayer
 
 
-class Chess:
+class Game:
     colors = {
         0: "#d18b47",  # Dark
         1: "#eead6f",  # Medium
@@ -83,13 +84,17 @@ class Chess:
         Load assets from disk
         ---
         """
-
         self.assets = {}
+        self.assets_dir = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "assets"
+        )
         pieces = ["pawn", "rook", "knight", "bishop", "king", "queen"]
         colors = ["black", "white"]
         for color in colors:
             for piece in pieces:
-                piece_asset = pygame.image.load(f"./assets/{piece}_{color}.svg")
+                piece_asset = pygame.image.load(
+                    os.path.join(self.assets_dir, f"{piece}_{color}.svg")
+                )
                 piece_asset = pygame.transform.scale(
                     piece_asset, (self.asset_size, self.asset_size)
                 )
@@ -535,4 +540,4 @@ class Chess:
 
 
 if __name__ == "__main__":
-    Chess().run()
+    Game().run()
