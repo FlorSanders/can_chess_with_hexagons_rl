@@ -127,7 +127,7 @@ class Rook(Piece):
         super().__init__(is_white=is_white)
         self.symbol = "R"
         self.name = "rook"
-        self.index = 3
+        self.index = 1
 
     def get_legal_moves(self, board, position_from):
         """
@@ -235,7 +235,7 @@ class Bishop(Piece):
         super().__init__(is_white=is_white)
         self.symbol = "B"
         self.name = "bishop"
-        self.index = 1
+        self.index = 3
 
     def get_legal_moves(self, board, position_from):
         """
@@ -244,6 +244,81 @@ class Bishop(Piece):
 
         # Initialize legal moves
         legal_moves = []
+
+        # For any diagonal
+        for diagonal in [0, 1, 2]:
+            # Move in positive & negative direction
+            for sign in [1, -1]:
+                # Move for distance
+                for distance in range(1, 5 + 1):
+                    # Move along diagonal
+                    position_to = board.move_along_diagonal(
+                        position_from, diagonal, sign * distance
+                    )
+
+                    # Break if position isn't on the board
+                    if position_to is None:
+                        break
+
+                    # Break if move is self capture
+                    piece_to = board.board[position_to]
+                    if piece_to is not None and piece_to.is_white == self.is_white:
+                        break
+
+                    # Add move to legal moves
+                    legal_moves.append(position_to)
+
+                    # Break if move is capture
+                    if piece_to is not None and piece_to.is_white != self.is_white:
+                        break
+
+        return legal_moves
+
+
+class Queen(Piece):
+    initial_positions = [
+        [(-1, -4)],  # Black
+        [(-1, 5)],  # White
+    ]
+
+    def __init__(self, is_white=True):
+        super().__init__(is_white=is_white)
+        self.symbol = "Q"
+        self.name = "queen"
+        self.index = 4
+
+    def get_legal_moves(self, board, position_from):
+        """
+        The queen may move any number of cells orthogonally or diagonally.
+        """
+        legal_moves = []
+
+        # For any axis
+        for axis in [0, 1, 2]:
+            # Move in positive & negative direction
+            for sign in [1, -1]:
+                # Move for distance
+                for distance in range(1, 10 + 1):
+                    # Move along axis
+                    position_to = board.move_along_axis(
+                        position_from, axis, sign * distance
+                    )
+
+                    # Break if position isn't on the board
+                    if position_to is None:
+                        break
+
+                    # Break if move is self capture
+                    piece_to = board.board[position_to]
+                    if piece_to is not None and piece_to.is_white == self.is_white:
+                        break
+
+                    # Add move to legal moves
+                    legal_moves.append(position_to)
+
+                    # Break if move is capture
+                    if piece_to is not None and piece_to.is_white != self.is_white:
+                        break
 
         # For any diagonal
         for diagonal in [0, 1, 2]:
@@ -330,80 +405,5 @@ class King(Piece):
 
                 # Add move to legal moves
                 legal_moves.append(position_to)
-
-        return legal_moves
-
-
-class Queen(Piece):
-    initial_positions = [
-        [(-1, -4)],  # Black
-        [(-1, 5)],  # White
-    ]
-
-    def __init__(self, is_white=True):
-        super().__init__(is_white=is_white)
-        self.symbol = "Q"
-        self.name = "queen"
-        self.index = 4
-
-    def get_legal_moves(self, board, position_from):
-        """
-        The queen may move any number of cells orthogonally or diagonally.
-        """
-        legal_moves = []
-
-        # For any axis
-        for axis in [0, 1, 2]:
-            # Move in positive & negative direction
-            for sign in [1, -1]:
-                # Move for distance
-                for distance in range(1, 10 + 1):
-                    # Move along axis
-                    position_to = board.move_along_axis(
-                        position_from, axis, sign * distance
-                    )
-
-                    # Break if position isn't on the board
-                    if position_to is None:
-                        break
-
-                    # Break if move is self capture
-                    piece_to = board.board[position_to]
-                    if piece_to is not None and piece_to.is_white == self.is_white:
-                        break
-
-                    # Add move to legal moves
-                    legal_moves.append(position_to)
-
-                    # Break if move is capture
-                    if piece_to is not None and piece_to.is_white != self.is_white:
-                        break
-
-        # For any diagonal
-        for diagonal in [0, 1, 2]:
-            # Move in positive & negative direction
-            for sign in [1, -1]:
-                # Move for distance
-                for distance in range(1, 5 + 1):
-                    # Move along diagonal
-                    position_to = board.move_along_diagonal(
-                        position_from, diagonal, sign * distance
-                    )
-
-                    # Break if position isn't on the board
-                    if position_to is None:
-                        break
-
-                    # Break if move is self capture
-                    piece_to = board.board[position_to]
-                    if piece_to is not None and piece_to.is_white == self.is_white:
-                        break
-
-                    # Add move to legal moves
-                    legal_moves.append(position_to)
-
-                    # Break if move is capture
-                    if piece_to is not None and piece_to.is_white != self.is_white:
-                        break
 
         return legal_moves
