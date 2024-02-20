@@ -1,4 +1,5 @@
 from hexchess.pieces import Pawn, Rook, Knight, Bishop, Queen, King
+from functools import lru_cache
 
 
 class HexChessBoard:
@@ -21,6 +22,7 @@ class HexChessBoard:
         ]
         self.is_checked = [False, False]  # black, white
 
+    @lru_cache()
     def get_coordinate_range(self, c_prime=0):
         """
         Get the range of coordinates that are allowed on one of the axes.
