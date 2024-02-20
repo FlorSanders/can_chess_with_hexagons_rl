@@ -46,13 +46,19 @@ class GreedyPlayer(Player):
         # Collect moves that capture pieces
         best_catch_move = None
         best_catch_value = 0
+        best_from_value = 1000
         for position_from, position_to in legal_moves:
             # Check if move captures a piece
+            piece_from = self.board.board[position_from]
             piece_to = self.board.board[position_to]
             if piece_to is None or piece_to.is_white == self.is_white:
                 continue
-            if piece_to.value > best_catch_value:
+            # Check if move is better than the best catch move
+            is_better_catch = piece_to.value >= best_catch_value
+            is_safer_move = piece_from.value <= best_from_value
+            if is_better_catch and is_safer_move:
                 best_catch_value = piece_to.value
+                best_from_value = piece_from.value
                 best_catch_move = (position_from, position_to)
 
         # Pick move
