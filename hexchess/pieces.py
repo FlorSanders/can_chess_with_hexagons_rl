@@ -1,12 +1,11 @@
 class Piece:
     initial_positions = [[], []]  # Black, White
+    symbol = "?"
+    name = "unknown"
+    index = -1
+    value = 0
 
     def __init__(self, is_white=True):
-        # Piece representation
-        self.symbol = "?"
-        self.name = "unknown"
-        self.index = -1
-
         # Piece properties
         self.is_white = is_white
 
@@ -16,6 +15,98 @@ class Piece:
 
     def __str__(self):
         return self.symbol
+
+    def _get_moves_along_axes(
+        self, board, position_from, distance_range=range(1, 10 + 1)
+    ):
+        """
+        Get the moves along axes.
+        ---
+        Args:
+        - board (Board): The chess board.
+        - position_from (tuple): The position of the piece to get moves for.
+        - distance_range (range): The range of distances to check.
+
+        Returns:
+        - moves (list): A list of moves along axes.
+        """
+        # Initialize moves
+        moves = []
+
+        # For any axis
+        for axis in range(3):
+            # Positive & negative direction
+            for sign in [-1, 1]:
+                # Move for distance
+                for distance in distance_range:
+                    # move along axis
+                    position_to = board.move_along_axis(
+                        position_from, axis, sign * distance
+                    )
+
+                    # Break if position is not on the board
+                    if position_to is None:
+                        break
+
+                    # Break if move is self capture
+                    piece_to = board.board[position_to]
+                    if piece_to is not None and piece_to.is_white == self.is_white:
+                        break
+
+                    # Add move
+                    moves.append(position_to)
+
+                    # Break if move is capture
+                    if piece_to is not None and piece_to.is_white != self.is_white:
+                        break
+
+        return moves
+
+    def _get_moves_along_diagonals(
+        self, board, position_from, distance_range=range(1, 5 + 1)
+    ):
+        """
+        Get the moves along diagonals.
+        ---
+        Args:
+        - board (Board): The chess board.
+        - position_from (tuple): The position of the piece to get moves for.
+        - distance_range (range): The range of distances to check.
+
+        Returns:
+        - moves (list): A list of moves along diagonals.
+        """
+        # Initialize moves
+        moves = []
+
+        # For any diagonal
+        for diagonal in range(3):
+            # Move in positive & negative direction
+            for sign in [1, -1]:
+                # Move for distance
+                for distance in distance_range:
+                    # Move along diagonal
+                    position_to = board.move_along_diagonal(
+                        position_from, diagonal, sign * distance
+                    )
+
+                    # Break if position isn't on the board
+                    if position_to is None:
+                        break
+
+                    # Break if move is self capture
+                    piece_to = board.board[position_to]
+                    if piece_to is not None and piece_to.is_white == self.is_white:
+                        break
+
+                    # Add move
+                    moves.append(position_to)
+
+                    # Break if move is capture
+                    if piece_to is not None and piece_to.is_white != self.is_white:
+                        break
+
+        return moves
 
     def get_legal_moves(self, board, position_from):
         """
@@ -57,12 +148,10 @@ class Pawn(Piece):
             (4, 1),
         ],  # White
     ]
-
-    def __init__(self, is_white=True):
-        super().__init__(is_white=is_white)
-        self.symbol = "P"
-        self.name = "pawn"
-        self.index = 0
+    symbol = "P"
+    name = "pawn"
+    index = 0
+    value = 1
 
     def get_legal_moves(self, board, position_from):
         """
@@ -122,49 +211,17 @@ class Rook(Piece):
         [(-3, -2), (3, -5)],  # Black
         [(3, 2), (-3, 5)],  # White
     ]
-
-    def __init__(self, is_white=True):
-        super().__init__(is_white=is_white)
-        self.symbol = "R"
-        self.name = "rook"
-        self.index = 1
+    symbol = "R"
+    name = "rook"
+    index = 1
+    value = 5
 
     def get_legal_moves(self, board, position_from):
         """
         The rook may move any number of cells orthogonally, traveling through cell edges.
         """
-
-        # Initialize legal moves
-        legal_moves = []
-
-        # For any axis
-        for axis in [0, 1, 2]:
-            # Move in positive & negative direction
-            for sign in [1, -1]:
-                # Move along distance
-                for distance in range(1, 10 + 1):
-                    # Move along axis
-                    position_to = board.move_along_axis(
-                        position_from, axis, sign * distance
-                    )
-
-                    # Break if position isn't on the board
-                    if position_to is None:
-                        break
-
-                    # Break if move is self capture
-                    piece_to = board.board[position_to]
-                    if piece_to is not None and piece_to.is_white == self.is_white:
-                        break
-
-                    # Add move to legal moves
-                    legal_moves.append(position_to)
-
-                    # Break if move is capture
-                    if piece_to is not None and piece_to.is_white != self.is_white:
-                        break
-
-        return legal_moves
+        axis_moves = self._get_moves_along_axes(board, position_from)
+        return axis_moves
 
 
 class Knight(Piece):
@@ -172,12 +229,10 @@ class Knight(Piece):
         [(-2, -3), (2, -5)],  # Black
         [(2, 3), (-2, 5)],  # White
     ]
-
-    def __init__(self, is_white=True):
-        super().__init__(is_white=is_white)
-        self.symbol = "N"
-        self.name = "knight"
-        self.index = 2
+    symbol = "N"
+    name = "knight"
+    index = 2
+    value = 3
 
     def get_legal_moves(self, board, position_from):
         """
@@ -230,49 +285,17 @@ class Bishop(Piece):
         [(0, -3), (0, -4), (0, -5)],  # Black
         [(0, 3), (0, 4), (0, 5)],  # White
     ]
-
-    def __init__(self, is_white=True):
-        super().__init__(is_white=is_white)
-        self.symbol = "B"
-        self.name = "bishop"
-        self.index = 3
+    symbol = "B"
+    name = "bishop"
+    index = 3
+    value = 3
 
     def get_legal_moves(self, board, position_from):
         """
         The bishop may move any number of cells diagonally, traveling through cell edges.
         """
-
-        # Initialize legal moves
-        legal_moves = []
-
-        # For any diagonal
-        for diagonal in [0, 1, 2]:
-            # Move in positive & negative direction
-            for sign in [1, -1]:
-                # Move for distance
-                for distance in range(1, 5 + 1):
-                    # Move along diagonal
-                    position_to = board.move_along_diagonal(
-                        position_from, diagonal, sign * distance
-                    )
-
-                    # Break if position isn't on the board
-                    if position_to is None:
-                        break
-
-                    # Break if move is self capture
-                    piece_to = board.board[position_to]
-                    if piece_to is not None and piece_to.is_white == self.is_white:
-                        break
-
-                    # Add move to legal moves
-                    legal_moves.append(position_to)
-
-                    # Break if move is capture
-                    if piece_to is not None and piece_to.is_white != self.is_white:
-                        break
-
-        return legal_moves
+        diagonal_moves = self._get_moves_along_diagonals(board, position_from)
+        return diagonal_moves
 
 
 class Queen(Piece):
@@ -280,74 +303,18 @@ class Queen(Piece):
         [(-1, -4)],  # Black
         [(-1, 5)],  # White
     ]
-
-    def __init__(self, is_white=True):
-        super().__init__(is_white=is_white)
-        self.symbol = "Q"
-        self.name = "queen"
-        self.index = 4
+    symbol = "Q"
+    name = "queen"
+    index = 4
+    value = 9
 
     def get_legal_moves(self, board, position_from):
         """
         The queen may move any number of cells orthogonally or diagonally.
         """
-        legal_moves = []
-
-        # For any axis
-        for axis in [0, 1, 2]:
-            # Move in positive & negative direction
-            for sign in [1, -1]:
-                # Move for distance
-                for distance in range(1, 10 + 1):
-                    # Move along axis
-                    position_to = board.move_along_axis(
-                        position_from, axis, sign * distance
-                    )
-
-                    # Break if position isn't on the board
-                    if position_to is None:
-                        break
-
-                    # Break if move is self capture
-                    piece_to = board.board[position_to]
-                    if piece_to is not None and piece_to.is_white == self.is_white:
-                        break
-
-                    # Add move to legal moves
-                    legal_moves.append(position_to)
-
-                    # Break if move is capture
-                    if piece_to is not None and piece_to.is_white != self.is_white:
-                        break
-
-        # For any diagonal
-        for diagonal in [0, 1, 2]:
-            # Move in positive & negative direction
-            for sign in [1, -1]:
-                # Move for distance
-                for distance in range(1, 5 + 1):
-                    # Move along diagonal
-                    position_to = board.move_along_diagonal(
-                        position_from, diagonal, sign * distance
-                    )
-
-                    # Break if position isn't on the board
-                    if position_to is None:
-                        break
-
-                    # Break if move is self capture
-                    piece_to = board.board[position_to]
-                    if piece_to is not None and piece_to.is_white == self.is_white:
-                        break
-
-                    # Add move to legal moves
-                    legal_moves.append(position_to)
-
-                    # Break if move is capture
-                    if piece_to is not None and piece_to.is_white != self.is_white:
-                        break
-
-        return legal_moves
+        axis_moves = self._get_moves_along_axes(board, position_from)
+        diagonal_moves = self._get_moves_along_diagonals(board, position_from)
+        return axis_moves + diagonal_moves
 
 
 class King(Piece):
@@ -355,55 +322,17 @@ class King(Piece):
         [(1, -5)],  # Black
         [(1, 4)],  # White
     ]
-
-    def __init__(self, is_white=True):
-        super().__init__(is_white=is_white)
-        self.symbol = "K"
-        self.name = "king"
-        self.index = 5
+    symbol = "K"
+    name = "king"
+    index = 5
+    value = 44  # One more than the sum of all other piece values on the board
 
     def get_legal_moves(self, board, position_from):
         """
         The king may move one cell orthogonally or diagonally. There is no castling.
         """
-        legal_moves = []
-
-        # For any axis
-        for axis in [0, 1, 2]:
-            # Move in positive & negative direction
-            for sign in [1, -1]:
-                # Move along axis
-                position_to = board.move_along_axis(position_from, axis, sign)
-
-                # Break if position isn't on the board
-                if position_to is None:
-                    continue
-
-                # Break if move is self capture
-                piece_to = board.board[position_to]
-                if piece_to is not None and piece_to.is_white == self.is_white:
-                    continue
-
-                # Add move to legal moves
-                legal_moves.append(position_to)
-
-        # For any diagonal
-        for diagonal in [0, 1, 2]:
-            # Move in positive & negative direction
-            for sign in [1, -1]:
-                # Move along diagonal
-                position_to = board.move_along_diagonal(position_from, diagonal, sign)
-
-                # Break if position isn't on the board
-                if position_to is None:
-                    continue
-
-                # Break if move is self capture
-                piece_to = board.board[position_to]
-                if piece_to is not None and piece_to.is_white == self.is_white:
-                    continue
-
-                # Add move to legal moves
-                legal_moves.append(position_to)
-
-        return legal_moves
+        axis_moves = self._get_moves_along_axes(board, position_from, range(1, 1 + 1))
+        diagonal_moves = self._get_moves_along_diagonals(
+            board, position_from, range(1, 1 + 1)
+        )
+        return axis_moves + diagonal_moves
