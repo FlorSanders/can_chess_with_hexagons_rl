@@ -10,7 +10,7 @@ Hexagonal chess, more specifically the version invented by Władysław Gliński,
 While the board is made up of 91 hexagon tiles, rather than 64 squares, all the familiar pieces are present and their legal movements are heavily inspired by the original game. For a description of the rules, see [Wikipedia](https://en.wikipedia.org/wiki/Hexagonal_chess).
 
 The game was implemented in Python with minimal dependencies, only `pygame==2.5.2` which has been used to develop the user interface.  
-In order to play the game, run `pyton play.py` from the main directory.
+In order to play the game, run `python play.py` from the main directory.
 
 ### Missing features
 
