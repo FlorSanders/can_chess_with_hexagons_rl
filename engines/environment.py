@@ -1,5 +1,9 @@
-from hexchess import HexChessBoard
 import numpy as np
+import sys
+
+# Import hex chess
+sys.path.append("..")
+from hexchess import HexChessBoard
 
 
 class HexChessEnv:
@@ -17,6 +21,7 @@ class HexChessEnv:
     def init_game(self):
         """
         Initialize the board
+        ---
         """
         # Reset board
         self.reset()
@@ -41,7 +46,7 @@ class HexChessEnv:
         """
         Convert q,r coordinates to action
         ---
-        Parameters:
+        Args:
         - position (tuple): The q,r coordinates of the position to convert.
 
         Returns:
@@ -56,7 +61,7 @@ class HexChessEnv:
         """
         Convert action to q,r coordinates
         ---
-        Parameters:
+        Args:
         - action (int): The action to convert.
 
         Returns:
@@ -69,6 +74,10 @@ class HexChessEnv:
         return q, r
 
     def reset(self):
+        """
+        Reset the game
+        ---
+        """
         # Initialize board
         self.board = HexChessBoard()
         self.opponent = self.opponent_class(self.board, self.opponent_is_white)
@@ -105,6 +114,16 @@ class HexChessEnv:
         return state
 
     def get_action_mask(self, is_white=None):
+        """
+        Get the action mask for the current state
+        ---
+        Args:
+        - is_white (bool): Whether the agent is playing as white. If None, the agent is playing as the opposite color.
+
+        Returns:
+        - action_mask: A boolean numpy array indicating the legality of each action.
+        """
+
         # Assume the agent is playing as default
         if is_white is None:
             is_white = not self.opponent_is_white
@@ -133,8 +152,8 @@ class HexChessEnv:
         """
         Perform a step in the environment
         ---
-        Parameters:
-        - action: A tuple containing the action to be performed (position_from, position_to).
+        Args:
+        - action: A tuple containing the action to be performed (index_from, index_to).
         ---
         Returns:
         - state: The state of the board after the action is performed.
@@ -144,7 +163,9 @@ class HexChessEnv:
         """
 
         # Parse action
-        position_from, position_to = action
+        index_from, index_to = action
+        position_from = self.index_to_position(index_from)
+        position_to = self.index_to_position(index_to)
 
         # Compute capture_reward
         capture_reward = 0

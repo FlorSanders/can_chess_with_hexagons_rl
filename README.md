@@ -25,6 +25,13 @@ Some of the more intricate rules of the game are still missing, being:
 
 TODO
 
+### Models
+
+- [ ] Q networks
+- [ ] Policy Gradient
+- [ ] Monte Carlo Tree Search?
+- [ ] Alphazero?
+
 ## Sources
 
 These are some useful references I have used during the development of this project.
