@@ -28,6 +28,8 @@ TODO
 ### Models
 
 - [ ] Q networks
+  - [x] Development
+  - [ ] Training
 - [ ] Policy Gradient
 - [ ] Monte Carlo Tree Search?
 - [ ] Alphazero?

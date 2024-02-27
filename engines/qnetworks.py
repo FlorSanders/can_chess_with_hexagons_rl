@@ -108,7 +108,7 @@ class QNetworkAgent:
 
 
 class QLearning:
-    def __init__(self, agent, environment, memory_size=50):
+    def __init__(self, agent, environment, memory_size=8192):
         self.agent = agent
         self.environment = environment
 
@@ -120,11 +120,12 @@ class QLearning:
         self,
         n_episodes=100,
         model_fix_episodes=10,
-        max_episode_length=100,
-        batch_size=10,
+        max_episode_length=250,
+        batch_size=1024,
     ):
         # Run through the episodes
         episode_rewards = np.zeros(n_episodes)
+        all_step_rewards = []
         for episode_index in range(n_episodes):
             # Update model every few episodes
             if episode_index % model_fix_episodes == 0:
@@ -132,19 +133,21 @@ class QLearning:
 
             # Run through an episode
             is_epsilon_greedy = episode_index < n_episodes - 1
-            episode_reward = self.run_episode(
+            step_rewards = self.run_episode(
                 episode_index,
                 max_length=max_episode_length,
                 batch_size=batch_size,
                 is_epsilon_greedy=is_epsilon_greedy,
             )
+            all_step_rewards.extend(step_rewards)
+            episode_reward = np.sum(step_rewards)
             episode_rewards[episode_index] = episode_reward
-            print(f"Episode {episode_index}: {episode_reward}")
+            print(f"Episode {episode_index}: reward = {episode_reward} over {len(step_rewards)} moves")
 
-        return episode_rewards
+        return episode_rewards, all_step_rewards
 
     def run_episode(
-        self, episode_index, max_length=100, batch_size=10, is_epsilon_greedy=True
+        self, episode_index, max_length=250, batch_size=1024, is_epsilon_greedy=True
     ):
         """
         Run a single episode of the game
@@ -156,7 +159,7 @@ class QLearning:
         - is_epsilon_greedy (bool): Whether to use epsilon-greedy exploration. Default is True.
         ---
         Returns:
-        - total_reward (float): The total reward for the episode.
+        - step_rewards (list): Immediate reward for each step in the episode
         """
 
         # Reset the environment
@@ -172,7 +175,7 @@ class QLearning:
         # Run the game
         is_finished = False
         step_index = 0
-        total_reward = 0
+        step_rewards = []
         while not is_finished:
             # Get the mask of legal actions
             action_mask = self.environment.get_action_mask()
@@ -204,18 +207,18 @@ class QLearning:
 
             # Perform the action
             new_state, reward, is_finished = self.environment.step(action)
-            total_reward += reward
+            step_rewards.append(reward)
 
             # Update agent
             sars_tuple = (state, action, reward, new_state)
-            self.update_agent(sars_tuple, batch_size)
+            self.update_agent(sars_tuple, batch_size, step_index)
 
             # Keep track of game length
             step_index += 1
             if step_index >= max_length:
                 is_finished = True
 
-        return total_reward
+        return step_rewards
 
     def update_memory(self, sars_tuple):
         """
@@ -245,7 +248,8 @@ class QLearning:
         - minibatch (list): The minibatch of samples.
         - minibatch_indices (list): The indices of the samples in the memory.
         """
-
+        # Actual batch size
+        batch_size = min(batch_size, len(self.memory))
         # Obtain random entries from our experience history
         probs = np.array(self.memory_probs)
         minibatch_indices = np.random.choice(
@@ -255,7 +259,7 @@ class QLearning:
 
         return minibatch, minibatch_indices
 
-    def update_agent(self, sars_tuple, batch_size):
+    def update_agent(self, sars_tuple, batch_size, step_index):
         """
         Update the agent with a new experience tuple
         ---
@@ -269,7 +273,7 @@ class QLearning:
         self.update_memory(sars_tuple)
 
         # 2) Check if enough experiences were acquired
-        if len(self.memory) < batch_size:
+        if len(self.memory) < step_index:
             return
 
         # 3) Sample a minibatch of samples from the memory

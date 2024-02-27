@@ -7,10 +7,11 @@ from hexchess import HexChessBoard
 
 
 class HexChessEnv:
-    def __init__(self, opponent_class, opponent_is_white):
+    def __init__(self, opponent_class, opponent_is_white, apply_negative_scores=True):
         # Save variables
         self.opponent_class = opponent_class
         self.opponent_is_white = opponent_is_white
+        self.apply_negative_scores = apply_negative_scores
 
         # Constants
         self.n_pieces = 6
@@ -202,7 +203,8 @@ class HexChessEnv:
                     position_from, position_to, self.opponent_is_white
                 )
             # Perform punishment if own piece is captured
-            reward -= opponent_capture_reward
+            if self.apply_negative_scores:
+                reward -= opponent_capture_reward
 
         # Return update info
         newstate = self.get_state()
