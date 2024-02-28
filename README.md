@@ -29,7 +29,8 @@ TODO
 
 - [ ] Q networks
   - [x] Development
-  - [ ] Training
+  - [x] Training
+  - [ ] Game integration
 - [ ] Policy Gradient
 - [ ] Monte Carlo Tree Search?
 - [ ] Alphazero?
