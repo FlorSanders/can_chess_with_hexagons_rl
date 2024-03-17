@@ -31,6 +31,11 @@ TODO
   - [x] Development
   - [x] Training
   - [ ] Game integration
+- [ ] Advantage Actor Critic (A2C)
+  - [ ] Development
+  - [ ] Training
+  - [ ] Game integration
+- [ ] Soft Actor Critic
 - [ ] Policy Gradient
 - [ ] Monte Carlo Tree Search?
 - [ ] Alphazero?
@@ -46,3 +51,21 @@ These are some useful references I have used during the development of this proj
   - [Demo](https://amethystmoon.github.io/)
 - [Chess Pygame Implementation Tutorial](https://www.youtube.com/watch?v=X-e0jk4I938)
 - [Reinforcement Learning for Chess](https://github.com/arjangroen/RLC)
+
+
+Advantage Actor Critic (A2C) 
+https://arxiv.org/abs/1602.01783
+https://towardsdatascience.com/understanding-actor-critic-methods-931b97b6df3f
+
+Soft Actor Critic (for Discrete Action Spaces) 
+https://arxiv.org/abs/1910.07207
+https://arxiv.org/abs/1801.01290
+https://spinningup.openai.com/en/latest/algorithms/sac.html#
+https://towardsdatascience.com/adapting-soft-actor-critic-for-discrete-action-spaces-a20614d4a50a
+
+
+## Potential Avenues for Improvement
+- Can we have the model learn the representation for states and actions instead of using the one-hot encoded representation?
+- 
+
+
