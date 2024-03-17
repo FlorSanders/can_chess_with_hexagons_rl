@@ -29,16 +29,23 @@ TODO
 
 - [ ] Q networks
   - [x] Development
-  - [x] Training
-  - [ ] Game integration
-- [ ] Advantage Actor Critic (A2C)
+  - [ ] Training (TODO train white) -> March 21st
+  - [ ] Game integration -> March 21st
+- [ ] Advantage Actor Critic (A2C) -> March 31st
   - [ ] Development
   - [ ] Training
   - [ ] Game integration
-- [ ] Soft Actor Critic
-- [ ] Policy Gradient
-- [ ] Monte Carlo Tree Search?
-- [ ] Alphazero?
+- [ ] Soft Actor Critic -> April 15th
+  - [ ] Development
+  - [ ] Training
+  - [ ] Game integration
+- [ ] Monte Carlo Tree Search
+  - [ ] Development
+  - [ ] Training
+  - [ ] Game integration
+- [ ] Model Evaluation Notebook -> March 24th
+- [ ] Report -> May 3rd
+- [ ] Final Presentation -> May 3rd
 
 ## Sources
 
