@@ -3,21 +3,22 @@ channels:
   - defaults
 dependencies:
   - conda-forge::pygame
-  - numpy
-  - matplotlib
   - ipykernel
+  - matplotlib
+  - numpy
+  - pip
+  - python==3.10
   - pip:
       - absl-py==2.1.0
-      - astunparse==1.6.3
       - certifi==2024.2.2
       - charset-normalizer==3.3.2
       - flatbuffers==24.3.7
-      - gast==0.5.4
-      - google-pasta==0.2.0
+      - gast==0.4.0
+      - google-auth-oauthlib==0.4.6
       - grpcio==1.62.1
       - h5py==3.10.0
       - idna==3.6
-      - keras==3.1.1
+      - keras==2.11.0
       - libclang==18.1.1
       - markdown==3.6
       - markdown-it-py==3.0.0
@@ -25,16 +26,17 @@ dependencies:
       - mdurl==0.1.2
       - ml-dtypes==0.3.2
       - namex==0.0.7
-      - opt-einsum==3.3.0
+      - oauthlib==3.2.2
       - optree==0.10.0
-      - protobuf==4.25.3
-      - requests==2.31.0
+      - protobuf==3.19.6
+      - pygments==2.17.2
       - rich==13.7.1
-      - tensorboard==2.16.2
-      - tensorboard-data-server==0.7.2
-      - tensorflow==2.16.1
+      - tensorboard==2.11.2
+      - tensorboard-data-server==0.6.1
+      - tensorboard-plugin-wit==1.8.1
+      - tensorflow==2.11.0
+      - tensorflow-estimator==2.11.0
       - termcolor==2.4.0
       - typing-extensions==4.10.0
       - urllib3==2.2.1
-      - werkzeug==3.0.1
       - wrapt==1.16.0
