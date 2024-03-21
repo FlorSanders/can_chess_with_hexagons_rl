@@ -3,7 +3,9 @@ import tensorflow.keras as krs
 import numpy as np
 import os
 import sys
+import logging
 
+logger = logging.getLogger(__name__)
 sys.path.append("..")
 from hexchess.players import Player
 from .environment import HexChessEnv
@@ -12,7 +14,7 @@ from .environment import HexChessEnv
 class QNetworkPlayer(Player):
     name = "DQN Player"
 
-    def __init__(self, board, is_white, model_name="randomgreedy_pr"):
+    def __init__(self, board, is_white, model_name="randomgreedy_pr", is_large=False):
         # Initialize player class
         super().__init__(board, is_white)
 
@@ -51,7 +53,7 @@ class QNetworkPlayer(Player):
                 np.max(legal_action_values) == 0
             ), "Illegal move was chosen while legal moves are available"
             # Pick legal action randomly
-            print("WARNING: Making random move since no legal moves seemed interesting")
+            logger.warning("Making random move since no legal moves seemed interesting")
             legal_actions = np.argwhere(action_mask)
             action_index = np.random.choice(legal_actions.shape[0])
             action = legal_actions[action_index]
@@ -67,9 +69,15 @@ class QNetworkPlayer(Player):
 
 class QNetworkAgent:
     def __init__(
-        self, model_path=None, discount_factor=0.5, learning_rate=1e-3, verbose=False
+        self,
+        model_path=None,
+        is_large=False,
+        discount_factor=0.5,
+        learning_rate=1e-3,
+        verbose=False,
     ):
         self.model_path = model_path
+        self.is_large = is_large
         self.gamma = discount_factor
         self.lr = learning_rate
         self.verbose = verbose
@@ -77,27 +85,62 @@ class QNetworkAgent:
 
     def init_network(self):
         if self.model_path is None:
-            # Model to map state (11 x 11 x 6) to action space value function (91 * 91 = 8281)
-            self.model = krs.models.Sequential(
-                [
-                    krs.layers.Input(shape=(11, 11, 6)),  # 11 x 11 x 6
-                    krs.layers.Conv2D(
-                        6, (3, 3), activation="relu", padding="same"
-                    ),  # 11 x 11 x 6
-                    krs.layers.UpSampling2D(size=(3, 3)),  # 33 x 33 x 6
-                    krs.layers.Conv2D(
-                        3, (3, 3), activation="relu", padding="same"
-                    ),  # 33 x 33 x 3
-                    krs.layers.UpSampling2D(size=(3, 3)),  # 99 x 99 x 3
-                    krs.layers.Conv2D(
-                        1, (5, 5), activation="relu", padding="valid"
-                    ),  # 95 x 95 x 1
-                    krs.layers.Conv2D(
-                        1, (5, 5), activation="linear", padding="valid"
-                    ),  # 91 x 91 x 1
-                    krs.layers.Flatten(),  # 8281
-                ]
-            )
+            if self.is_large:
+                # Model to map state (11 x 11 x 6) to action space value function (91 * 91 = 8281)
+                self.model = krs.models.Sequential(
+                    [
+                        krs.layers.Input(shape=(11, 11, 6)),  # 11 x 11 x 6
+                        krs.layers.Conv2D(
+                            6, (3, 3), activation="relu", padding="same"
+                        ),  # 11 x 11 x 6
+                        krs.layers.Conv2D(
+                            6, (3, 3), activation="relu", padding="same"
+                        ),  # 11 x 11 x 6
+                        krs.layers.UpSampling2D(size=(3, 3)),  # 33 x 33 x 6
+                        krs.layers.Conv2D(
+                            3, (3, 3), activation="relu", padding="same"
+                        ),  # 33 x 33 x 3
+                        krs.layers.Conv2D(
+                            3, (3, 3), activation="relu", padding="same"
+                        ),  # 33 x 33 x 3
+                        krs.layers.UpSampling2D(size=(3, 3)),  # 99 x 99 x 3
+                        krs.layers.Conv2D(
+                            1, (5, 5), activation="relu", padding="valid"
+                        ),  # 95 x 95 x 1
+                        krs.layers.Conv2D(
+                            1, (5, 5), activation="relu", padding="same"
+                        ),  # 95 x 95 x 1
+                        krs.layers.Conv2D(
+                            1, (5, 5), activation="linear", padding="valid"
+                        ),  # 91 x 91 x 1
+                        krs.layers.Conv2D(
+                            1, (5, 5), activation="linear", padding="same"
+                        ),  # 91 x 91 x 1
+                        krs.layers.Flatten(),  # 8281
+                    ]
+                )
+            else:
+                # Model to map state (11 x 11 x 6) to action space value function (91 * 91 = 8281)
+                self.model = krs.models.Sequential(
+                    [
+                        krs.layers.Input(shape=(11, 11, 6)),  # 11 x 11 x 6
+                        krs.layers.Conv2D(
+                            6, (3, 3), activation="relu", padding="same"
+                        ),  # 11 x 11 x 6
+                        krs.layers.UpSampling2D(size=(3, 3)),  # 33 x 33 x 6
+                        krs.layers.Conv2D(
+                            3, (3, 3), activation="relu", padding="same"
+                        ),  # 33 x 33 x 3
+                        krs.layers.UpSampling2D(size=(3, 3)),  # 99 x 99 x 3
+                        krs.layers.Conv2D(
+                            1, (5, 5), activation="relu", padding="valid"
+                        ),  # 95 x 95 x 1
+                        krs.layers.Conv2D(
+                            1, (5, 5), activation="linear", padding="valid"
+                        ),  # 91 x 91 x 1
+                        krs.layers.Flatten(),  # 8281
+                    ]
+                )
         else:
             self.model = krs.models.load_model(self.model_path)
 

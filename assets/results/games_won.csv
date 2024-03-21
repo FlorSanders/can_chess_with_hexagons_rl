@@ -1,0 +1,5 @@
+,Random (baseline),Greedy (baseline),DQN (random),DQN (random + greedy)
+Random (baseline),4,0,2,1
+Greedy (baseline),10,9,10,9
+DQN (random),4,2,0,0
+DQN (random + greedy),3,2,0,0
