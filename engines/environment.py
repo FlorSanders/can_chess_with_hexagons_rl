@@ -7,7 +7,13 @@ from hexchess import HexChessBoard
 
 
 class HexChessEnv:
-    def __init__(self, opponent_class, opponent_is_white, apply_negative_scores=True):
+    def __init__(
+        self,
+        opponent_class,
+        opponent_is_white: bool,
+        apply_negative_scores: bool = True,
+        board: HexChessBoard = None,
+    ):
         # Save variables
         self.opponent_class = opponent_class
         self.opponent_is_white = opponent_is_white
@@ -17,15 +23,15 @@ class HexChessEnv:
         self.n_pieces = 6
 
         # Initialize game
-        self.init_game()
+        self.init_game(board=board)
 
-    def init_game(self):
+    def init_game(self, board: HexChessBoard = None):
         """
         Initialize the board
         ---
         """
         # Reset board
-        self.reset()
+        self.reset(board=board)
 
         # Board properties
         self.board_size = len(self.board.board.keys())
@@ -74,14 +80,15 @@ class HexChessEnv:
         r = action - self.mapper[i] + r_min
         return q, r
 
-    def reset(self):
+    def reset(self, board: HexChessBoard = None):
         """
         Reset the game
         ---
         """
         # Initialize board
-        self.board = HexChessBoard()
-        self.opponent = self.opponent_class(self.board, self.opponent_is_white)
+        self.board = HexChessBoard() if board is None else board
+        if self.opponent_class is not None:
+            self.opponent = self.opponent_class(self.board, self.opponent_is_white)
         self.actions = []
         self.rewards = []
 

@@ -2,9 +2,12 @@ import pygame
 import math
 import random
 import os
+import logging
 from hexchess.board import HexChessBoard
 from hexchess.utils import hexagon_dimensions, hexagon_points, qr_to_xy, xy_to_qr
 from hexchess.players import RandomPlayer, GreedyPlayer
+
+logger = logging.getLogger(__name__)
 
 
 class Game:
@@ -23,11 +26,15 @@ class Game:
         "finished",
     ]
 
-    def __init__(self):
+    def __init__(self, players=[]):
         # Initialize board
+        logger.debug("Initializing Game")
         self.set_state("home")
         self.setup()
         self.load_assets()
+
+        # Opponent classes
+        self.players = players
 
         # Menu state
         self.two_player = None
@@ -53,6 +60,7 @@ class Game:
         """
 
         # Start PyGame
+        logger.debug("Setup PyGame")
         pygame.init()
         self.screen_w, self.screen_h = 1200, 900
         self.screen = pygame.display.set_mode((self.screen_w, self.screen_h))
@@ -69,6 +77,7 @@ class Game:
         self.hex_size = 35
         self.button_w = 400
         self.button_h = 50
+        self.button_padding = 50
 
         # Define button positions
         ## Even buttons
@@ -84,6 +93,7 @@ class Game:
         Load assets from disk
         ---
         """
+        logger.debug("Loading Assets")
         self.assets = {}
         self.assets_dir = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "assets"
@@ -209,6 +219,28 @@ class Game:
         )
         self.draw_text(text, x, y, size="title")
 
+    def draw_buttons(self, button_labels=[]):
+        """
+        Draw buttons on the screen
+        ---
+        """
+
+        # Screen center
+        x_center = self.screen_w / 2
+        y_center = self.screen_h / 2
+
+        # Button offset
+        n_btns = len(button_labels)
+        y_range = n_btns * self.button_h + (n_btns - 1) * self.button_padding
+        y_offset = -y_range / 2
+
+        # Draw buttons
+        for btn_label in button_labels:
+            # Draw button
+            self.draw_button(btn_label, x_center, y_center + y_offset)
+            # Update offset
+            y_offset += self.button_h + self.button_padding
+
     def draw_title(self):
         """
         Draw the title on the screen
@@ -232,8 +264,7 @@ class Game:
         self.draw_title()
 
         # Draw 1 player & 2 player buttons
-        self.draw_button("1 Player Game", self.screen_w / 2, self.btn_em1_y)
-        self.draw_button("2 Player Game", self.screen_w / 2, self.btn_ep1_y)
+        self.draw_buttons(["1 Player Game", "2 Player Game"])
 
     def draw_menu(self, menu=1):
         """
@@ -246,11 +277,11 @@ class Game:
         self.draw_title()
         assert menu in [1, 2], f"Unknown menu {menu}"
         button_labels = (
-            ["easy", "medium", "hard"] if menu == 1 else ["white", "black", "random"]
+            [f"{engine.name}" for engine in self.players]
+            if menu == 1
+            else ["White", "Black", "Random"]
         )
-        button_ys = [self.btn_om1_y, self.btn_o0_y, self.btn_op1_y]
-        for label, btn_y in zip(button_labels, button_ys):
-            self.draw_button(label, self.screen_w / 2, btn_y)
+        self.draw_buttons(button_labels)
 
     def draw_board(self):
         """
@@ -356,6 +387,7 @@ class Game:
 
     def start_game(self):
         # Game state
+        logger.debug("Starting game")
         self.turn_is_white = True  # White moves first
         self.selected_piece = None
         self.legal_moves = []
@@ -365,81 +397,79 @@ class Game:
 
         # Initialize NPC if single player game
         if not self.two_player:
-            # TODO: Implement difficulty properly
-            if self.difficulty == 0:
-                # Random Player
-                self.npc = RandomPlayer(self.board, not self.player_is_white)
-            else:
-                # Greedy Player
-                self.npc = GreedyPlayer(self.board, not self.player_is_white)
+            npc_class = self.players[self.difficulty]
+            self.npc = npc_class(self.board, not self.player_is_white)
 
         # Start playing
         self.set_state("playing")
 
-    def handle_home_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            # Mouse click at position x,y
-            x, y = event.pos
+    def detect_button_click(self, event, n_buttons):
+        # Make sure button is clicked
+        btn_clicked = None
+        if not (event.type == pygame.MOUSEBUTTONDOWN and event.button == 1):
+            return btn_clicked
 
-            # Check click is in button region
+        # Screen center
+        x_center = self.screen_w / 2
+        y_center = self.screen_h / 2
+
+        # Make sure mouse click is in the right x-range
+        x, y = event.pos
+        if not (
+            x > (x_center - self.button_w / 2) and x < (x_center + self.button_w / 2)
+        ):
+            return btn_clicked
+
+        # Check if mouse click is in the right y-range
+        y_range = n_buttons * self.button_h + (n_buttons - 1) * self.button_padding
+        y_offset = -y_range / 2
+        for btn_index in range(n_buttons):
+            # Check if button is clicked
             if (
-                x > self.screen_w / 2 - self.button_w / 2
-                and x < self.screen_w / 2 + self.button_w / 2
+                y > y_center + y_offset - self.button_h / 2
+                and y < y_center + y_offset + self.button_h / 2
             ):
-                if (
-                    y > self.btn_em1_y - self.button_h / 2
-                    and y < self.btn_em1_y + self.button_h / 2
-                ):
-                    # Start 1 player game
-                    self.two_player = False
-                    self.set_state("menu_1")  # choose difficulty
-                elif (
-                    y > self.btn_ep1_y - self.button_h / 2
-                    and y < self.btn_ep1_y + self.button_h / 2
-                ):
-                    # Start 1 player game
-                    self.two_player = True
-                    self.start_game()
+                return btn_index
+
+            # Update y offset
+            y_offset += self.button_h + self.button_padding
+
+        return btn_clicked
+
+    def handle_home_event(self, event):
+        # Check click is in button region
+        btn_clicked = self.detect_button_click(event, 2)
+        if btn_clicked == 0:
+            # Start 1 player game
+            logger.info("1 player game")
+            self.two_player = False
+            self.set_state("menu_1")  # choose difficulty
+        elif btn_clicked == 1:
+            # Start 2 player game
+            logger.info("2 player game")
+            self.two_player = True
+            self.start_game()
 
     def handle_menu_event(self, event, menu=1):
         assert menu in [1, 2], f"Unknown menu {menu}"
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            # Mouse click at position x,y
-            x, y = event.pos
+        n_buttons = len(self.players) if menu == 1 else 3
+        btn_clicked = self.detect_button_click(event, n_buttons)
 
-            # Check click is in button region
-            if (
-                x > self.screen_w / 2 - self.button_w / 2
-                and x < self.screen_w / 2 + self.button_w / 2
-            ):
-                btn_pressed = None
-                if (
-                    y > self.btn_om1_y - self.button_h / 2
-                    and y < self.btn_om1_y + self.button_h / 2
-                ):
-                    btn_pressed = 0
-                elif (
-                    y > self.btn_o0_y - self.button_h / 2
-                    and y < self.btn_o0_y + self.button_h / 2
-                ):
-                    btn_pressed = 1
-                elif (
-                    y > self.btn_op1_y - self.button_h / 2
-                    and y < self.btn_op1_y + self.button_h / 2
-                ):
-                    btn_pressed = 2
+        if btn_clicked is None:
+            return
 
-                if btn_pressed is not None:
-                    if menu == 1:
-                        # Menu 1 = choose difficulty
-                        self.difficulty = btn_pressed
-                        self.set_state("menu_2")  # choose color
-                    elif menu == 2:
-                        # Menu 2 = choose color
-                        self.player_is_white = btn_pressed == 0
-                        if btn_pressed == 2:
-                            self.player_is_white = random.choice([True, False])
-                        self.start_game()  # Start playing
+        if menu == 1:
+            # Menu = choose player
+            logger.info(f"Selected NPC Player: {self.players[btn_clicked].name}")
+            self.difficulty = btn_clicked
+            self.set_state("menu_2")  # choose color
+        else:
+            # Menu 2 = choose color
+            self.player_is_white = btn_clicked == 0
+            if btn_clicked == 2:
+                self.player_is_white = random.choice([True, False])
+            logger.info(f"Playing as {'white' if self.player_is_white else 'black'}")
+            self.start_game()  # Start playing
 
     def get_player_move(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -453,6 +483,7 @@ class Game:
             if max([q, r, s]) <= 5 and min([q, r, s]) >= -5:
                 # Piece selected
                 selected_piece = self.board.board[pos]
+                logger.debug(f"Piece selected: {selected_piece}")
                 if (
                     selected_piece is not None
                     and selected_piece.is_white == self.turn_is_white

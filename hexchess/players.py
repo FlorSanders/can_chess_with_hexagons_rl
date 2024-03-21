@@ -2,6 +2,8 @@ import random
 
 
 class Player:
+    name = "Undefined Player"
+
     def __init__(self, board, is_white):
         self.board = board
         self.is_white = is_white
@@ -18,12 +20,17 @@ class Player:
     def get_move(self):
         pass
 
+    def __str__(self):
+        return self.name
+
 
 class RandomPlayer(Player):
     """
     Player performing random moves.
     ---
     """
+
+    name = "Random Player"
 
     def get_move(self):
         legal_moves = self.get_legal_moves()
@@ -38,6 +45,8 @@ class GreedyPlayer(Player):
     Otherwise, a random move is performed.
     ---
     """
+
+    name = "Greedy Player"
 
     def get_move(self):
         # Get legal moves

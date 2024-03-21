@@ -19,14 +19,14 @@ class QNetworkPlayer(Player):
         # Load model
         self.model_name = model_name
         self.color = "white" if is_white else "black"
+        cwd = os.getcwd()
         self.model_path = os.path.join(
-            "assets", "qnetworks", f"{self.model_name}_model_{self.color}"
+            cwd, "assets", "qnetworks", f"{self.model_name}_model_{self.color}.keras"
         )
         self.agent = QNetworkAgent(model_path=self.model_path)
 
         # Use environment wrapper for state & action mask functions
-        self.env = HexChessEnv(None, None, init_game=False)
-        self.env.board = board
+        self.env = HexChessEnv(None, None, board=board)
 
     def get_move(self):
         # Obtain legal moves mask
@@ -34,7 +34,9 @@ class QNetworkPlayer(Player):
 
         # Evaluate state to get Q-value estimates
         state = self.env.get_state()
-        action_values = self.agent.get_action_values(state, is_fixed=False)
+        action_values = self.agent.get_action_values(
+            np.expand_dims(state, 0), is_fixed=False
+        )
         action_values = np.reshape(action_values, action_mask.shape)
 
         # Get values for legal moves
@@ -56,14 +58,11 @@ class QNetworkPlayer(Player):
 
         # Decode action indices to board positions
         index_from, index_to = action
-        position_from = self.index_to_position(index_from)
-        position_to = self.index_to_position(index_to)
+        position_from = self.env.index_to_position(index_from)
+        position_to = self.env.index_to_position(index_to)
 
-        # Perform move
-        success, finished = self.board.move(
-            position_from, position_to, not self.opponent_is_white
-        )
-        assert success, "Illegal move was chosen"
+        # Return move
+        return position_from, position_to
 
 
 class QNetworkAgent:
