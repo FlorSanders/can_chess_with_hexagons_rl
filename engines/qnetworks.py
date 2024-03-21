@@ -131,8 +131,14 @@ class QLearning:
             if episode_index % model_fix_episodes == 0:
                 self.agent.fix_model()
                 if episode_index > 0:
-                    model_fix_reward = np.mean(episode_rewards[episode_index-model_fix_episodes:episode_index])
-                    print(f"Episodes {episode_index-model_fix_episodes} - {episode_index}: Mean reward {model_fix_reward}")
+                    model_fix_reward = np.mean(
+                        episode_rewards[
+                            episode_index - model_fix_episodes : episode_index
+                        ]
+                    )
+                    print(
+                        f"Episodes {episode_index-model_fix_episodes} - {episode_index}: Mean reward {model_fix_reward}"
+                    )
 
             # Run through an episode
             is_epsilon_greedy = episode_index < n_episodes - 1
@@ -145,7 +151,7 @@ class QLearning:
             all_step_rewards.extend(step_rewards)
             episode_reward = np.sum(step_rewards)
             episode_rewards[episode_index] = episode_reward
-            #print(f"Episode {episode_index}: reward = {episode_reward} over {len(step_rewards)} moves")
+            # print(f"Episode {episode_index}: reward = {episode_reward} over {len(step_rewards)} moves")
 
         return episode_rewards, all_step_rewards
 
