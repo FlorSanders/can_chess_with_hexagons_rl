@@ -4,12 +4,25 @@
 
 The goal of this project is to explore the use of reinforcement learning techniques to build a chess engine for gameplay on a non-traditional hexagonal board.
 
+## Setup
+
+In order to install the dependencies, initiate a conda environment from the `environment.yml` file.
+
+```bash
+conda env create -f environment.yml
+```
+
+If changes are made, the environment can be exported using the provided script.
+
+```bash
+bash export-environment.sh
+```
+
 ## The Game
 
 Hexagonal chess, more specifically the version invented by Władysław Gliński, is played on a non-traditional hexagonal chess board.  
 While the board is made up of 91 hexagon tiles, rather than 64 squares, all the familiar pieces are present and their legal movements are heavily inspired by the original game. For a description of the rules, see [Wikipedia](https://en.wikipedia.org/wiki/Hexagonal_chess).
 
-The game was implemented in Python with minimal dependencies, only `pygame==2.5.2` which has been used to develop the user interface.  
 In order to play the game, run `python play.py` from the main directory.
 
 ### Missing features
@@ -59,20 +72,17 @@ These are some useful references I have used during the development of this proj
 - [Chess Pygame Implementation Tutorial](https://www.youtube.com/watch?v=X-e0jk4I938)
 - [Reinforcement Learning for Chess](https://github.com/arjangroen/RLC)
 
-
-Advantage Actor Critic (A2C) 
+Advantage Actor Critic (A2C)
 https://arxiv.org/abs/1602.01783
 https://towardsdatascience.com/understanding-actor-critic-methods-931b97b6df3f
 
-Soft Actor Critic (for Discrete Action Spaces) 
+Soft Actor Critic (for Discrete Action Spaces)
 https://arxiv.org/abs/1910.07207
 https://arxiv.org/abs/1801.01290
 https://spinningup.openai.com/en/latest/algorithms/sac.html#
 https://towardsdatascience.com/adapting-soft-actor-critic-for-discrete-action-spaces-a20614d4a50a
 
-
 ## Potential Avenues for Improvement
+
 - Can we have the model learn the representation for states and actions instead of using the one-hot encoded representation?
-- 
-
-
+-
