@@ -1,5 +1,8 @@
-from hexchess.pieces import Pawn, Rook, Knight, Bishop, Queen, King
+from hexchess.pieces import Pawn, Rook, Knight, Bishop, Queen, King, piece_map
 from functools import lru_cache
+import json
+import numpy as np
+import os
 
 
 class HexChessBoard:
@@ -8,19 +11,45 @@ class HexChessBoard:
     ---
     """
 
-    def __init__(self, empty_board=False):
+    def __init__(
+        self,
+        initialize_empty=False,
+        initialize_random=False,
+        save_dir=os.path.join(os.path.dirname(__file__), "..", "states"),
+        save_prob=0.1,
+    ):
         """
         Initialize the chess board.
         ---
         Args:
-        - empty_board (bool): Whether to initiallize the board in an empty state
+        - initialize_empty (bool): Whether to initiallize the board in an empty state
+        - initialize_random (bool): Whether to initialize the board in a random state (from save_dir)
+        - save_dir: Directory of saved states
+        - save_prob: Probability to save the state any time get_move is called
         """
-        self.board = self.initialize_board(empty_board=empty_board)
+        # Make sure either save_dir exists or we don't expect random initialization
+        assert (
+            save_dir is not None or not initialize_random
+        ), "Random initialization is only possible if a directory is provided"
+
+        # Save params
+        os.makedirs(save_dir, exist_ok=True)
+        self.save_dir = save_dir
+        self.save_prob = save_prob
+
+        # Initialize game
+        self.initialize_board(
+            empty_board=initialize_empty,
+            random_board=initialize_random,
+        )
         self.captures = [
             [],  # black captures
             [],  # white captures
         ]
-        self.is_checked = [False, False]  # black, white
+        self.is_checked = [
+            False,  # black
+            False,  # white
+        ]
 
     @lru_cache()
     def get_coordinate_range(self, c_prime=0):
@@ -134,7 +163,11 @@ class HexChessBoard:
 
         return position_to
 
-    def initialize_board(self, empty_board=False):
+    def initialize_board(
+        self,
+        empty_board=False,
+        random_board=False,
+    ):
         """
         Initialize the chess board and add the pieces in their initial positions.
         ---
@@ -144,7 +177,7 @@ class HexChessBoard:
         Returns:
         - board (dict): A dictionary representing the chess board.
         """
-        board = {}
+        self.board = {}
 
         # Q axis
         q_min, q_max = self.get_coordinate_range()
@@ -152,20 +185,92 @@ class HexChessBoard:
             # R axis
             r_min, r_max = self.get_coordinate_range(q)
             for r in range(r_min, r_max + 1):
-                board[(q, r)] = None
+                self.board[(q, r)] = None
 
-        # Return board empty if specified
+        # Initialize board empty if specified
         if empty_board:
-            return board
+            return self.board
+
+        # Initialize board randomly if specified
+        if random_board:
+            # Initialize randomly
+            success = self.load_state(state_file=None)
+            if success:
+                return self.board
+            else:
+                print(
+                    "WARNING: Random initialization requested but failed - initializing with standard layout"
+                )
 
         # Add pieces to the board
         for is_white in [True, False]:
             for piece in [Pawn, Rook, Knight, Bishop, King, Queen]:
                 initial_positions = piece.initial_positions[is_white]
                 for position in initial_positions:
-                    board[position] = piece(is_white=is_white)
+                    self.board[position] = piece(is_white=is_white)
 
-        return board
+        return self.board
+
+    def save_state(self):
+        """
+        Save the current state of the chess board.
+        ---
+        """
+        # Build state
+        board_state = {}
+        for position, piece in self.board.items():
+            if piece is not None:
+                board_state[f"{position}"] = [piece.symbol, piece.is_white]
+            else:
+                board_state[f"{position}"] = None
+
+        # Save state
+        file_name = f"{len(os.listdir(self.save_dir))}".zfill(5) + ".json"
+        with open(os.path.join(self.save_dir, file_name), "w") as f:
+            json.dump(board_state, f)
+
+    def load_state(self, state_file=None):
+        """
+        Load a chess board state from a file.
+        ---
+        Args:
+        - state_file (str): The file to load the board state from. (picks a random file if None)
+
+        Returns:
+        - success (bool): True if a state
+        """
+
+        # Pick random state file if none is chosen
+        if state_file is None:
+            state_files = os.listdir(self.save_dir)
+            if len(state_files) == 0:
+                return False
+            state_file = np.random.choice(state_files)
+
+        # Make sure state file exists
+        if not os.path.exists(os.path.join(self.save_dir, state_file)):
+            return False
+
+        # Load state
+        with open(os.path.join(self.save_dir, state_file), "r") as f:
+            board_state = json.load(f)
+
+        # Parse board state
+        for position, piece in board_state.items():
+            # print(isinstance(position, tuple), isinstance(position, str))
+            position = tuple(
+                [
+                    int(i)
+                    for i in f"{position}".replace("(", "").replace(")", "").split(",")
+                ]
+            )
+            if piece is None:
+                self.board[position] = None
+            else:
+                symbol, is_white = piece
+                self.board[position] = piece_map[symbol](is_white)
+
+        return True
 
     def get_pieces(self, is_white):
         """
@@ -214,6 +319,10 @@ class HexChessBoard:
         - success (bool): True if the move was successful, False otherwise.
         - finished (bool): True if the game is over, False otherwise.
         """
+
+        # Save the state
+        if np.random.random() < self.save_prob:
+            self.save_state()
 
         # Keep track of whether the game is finished
         finished = False

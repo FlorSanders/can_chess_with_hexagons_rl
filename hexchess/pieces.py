@@ -336,3 +336,9 @@ class King(Piece):
             board, position_from, range(1, 1 + 1)
         )
         return axis_moves + diagonal_moves
+
+
+# Map piece symbols to piece classes
+piece_map = {}
+for piece in [Pawn, Rook, Knight, Bishop, Queen, King]:
+    piece_map[piece.symbol] = piece
