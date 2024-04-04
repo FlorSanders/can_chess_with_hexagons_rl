@@ -13,11 +13,13 @@ class HexChessEnv:
         opponent_is_white: bool,
         apply_negative_scores: bool = True,
         board: HexChessBoard = None,
+        board_kwargs={},
     ):
         # Save variables
         self.opponent_class = opponent_class
         self.opponent_is_white = opponent_is_white
         self.apply_negative_scores = apply_negative_scores
+        self.board_kwargs = board_kwargs
 
         # Constants
         self.n_pieces = 6
@@ -86,7 +88,7 @@ class HexChessEnv:
         ---
         """
         # Initialize board
-        self.board = HexChessBoard() if board is None else board
+        self.board = HexChessBoard(**self.board_kwargs) if board is None else board
         if self.opponent_class is not None:
             self.opponent = self.opponent_class(self.board, self.opponent_is_white)
         self.actions = []
