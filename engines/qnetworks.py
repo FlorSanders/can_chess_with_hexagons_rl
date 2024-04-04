@@ -21,11 +21,11 @@ class QNetworkPlayer(Player):
         # Load model
         self.model_name = model_name
         self.color = "white" if is_white else "black"
-        cwd = os.getcwd()
-        self.model_path = os.path.join(
-            cwd, "assets", "qnetworks", f"{self.model_name}_model_{self.color}.keras"
-        )
-        self.agent = QNetworkAgent(model_path=self.model_path)
+        self.is_large = "_large" if is_large else ""
+        cwd = os.path.join(os.path.dirname(__file__), "..")
+        model_file = f"{self.model_name}_{self.color}{self.is_large}.keras"
+        self.model_path = os.path.join(cwd, "assets", "qnetworks", model_file)
+        self.agent = QNetworkAgent(model_path=self.model_path, is_large=is_large)
 
         # Use environment wrapper for state & action mask functions
         self.env = HexChessEnv(None, None, board=board)
@@ -67,6 +67,47 @@ class QNetworkPlayer(Player):
         return position_from, position_to
 
 
+class Conv2DSkipBlock(krs.layers.Layer):
+    def __init__(self, n_layers, filters, kernel_size, **kwargs):
+        # Initialize superclass
+        super().__init__()
+
+        # Save params
+        self.n_layers = n_layers
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.kwargs = kwargs
+
+        # Implement layers
+        self.layers = [None] * n_layers
+        for i in range(n_layers):
+            self.layers[i] = krs.layers.Conv2D(filters, kernel_size, **kwargs)
+
+    def call(self, inp):
+        # Apply layers
+        x = inp
+        for layer in self.layers:
+            x = layer(x)
+        # Apply skip connection
+        x += inp
+
+        return x
+
+    def get_config(self):
+        # Get config
+        config = super().get_config()
+        config.update(
+            {
+                "n_layers": self.n_layers,
+                "filters": self.filters,
+                "kernel_size": self.kernel_size,
+            }
+        )
+        config.update(self.kwargs)
+
+        return config
+
+
 class QNetworkAgent:
     def __init__(
         self,
@@ -90,31 +131,22 @@ class QNetworkAgent:
                 self.model = krs.models.Sequential(
                     [
                         krs.layers.Input(shape=(11, 11, 6)),  # 11 x 11 x 6
-                        krs.layers.Conv2D(
-                            6, (3, 3), activation="relu", padding="same"
-                        ),  # 11 x 11 x 6
-                        krs.layers.Conv2D(
-                            6, (3, 3), activation="relu", padding="same"
+                        Conv2DSkipBlock(
+                            3, 6, (3, 3), activation="relu", padding="same"
                         ),  # 11 x 11 x 6
                         krs.layers.UpSampling2D(size=(3, 3)),  # 33 x 33 x 6
+                        Conv2DSkipBlock(
+                            3, 6, (3, 3), activation="relu", padding="same"
+                        ),  # 33 x 33 x 6
+                        krs.layers.UpSampling2D(size=(3, 3)),  # 99 x 99 x 6
                         krs.layers.Conv2D(
-                            3, (3, 3), activation="relu", padding="same"
-                        ),  # 33 x 33 x 3
-                        krs.layers.Conv2D(
-                            3, (3, 3), activation="relu", padding="same"
-                        ),  # 33 x 33 x 3
-                        krs.layers.UpSampling2D(size=(3, 3)),  # 99 x 99 x 3
-                        krs.layers.Conv2D(
-                            1, (5, 5), activation="relu", padding="valid"
-                        ),  # 95 x 95 x 1
-                        krs.layers.Conv2D(
-                            1, (5, 5), activation="relu", padding="same"
-                        ),  # 95 x 95 x 1
+                            6, (5, 5), activation="relu", padding="valid"
+                        ),  # 95 x 95 x 6
+                        Conv2DSkipBlock(
+                            3, 6, (3, 3), activation="relu", padding="same"
+                        ),  # 95 x 95 x 6
                         krs.layers.Conv2D(
                             1, (5, 5), activation="linear", padding="valid"
-                        ),  # 91 x 91 x 1
-                        krs.layers.Conv2D(
-                            1, (5, 5), activation="linear", padding="same"
                         ),  # 91 x 91 x 1
                         krs.layers.Flatten(),  # 8281
                     ]
@@ -142,7 +174,11 @@ class QNetworkAgent:
                     ]
                 )
         else:
-            self.model = krs.models.load_model(self.model_path)
+            custom_objects = {"Conv2DSkipBlock": Conv2DSkipBlock}
+            # with krs.saving.custom_object_scope(custom_objects):
+            self.model = krs.models.load_model(
+                self.model_path, custom_objects=custom_objects
+            )
 
         # Compile the model
         self.compile_model(self.model)
