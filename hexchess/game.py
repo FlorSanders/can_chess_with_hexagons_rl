@@ -356,13 +356,16 @@ class Game:
         # Draw title
         self.draw_title()
 
+        # Draw new game button
+        self.draw_buttons(["New Game"])
+
         # Draw winner message
         winner = "White" if self.turn_is_white else "Black"
         winner_message = f"{winner} wins!"
         self.draw_text(
             winner_message,
             self.screen_w / 2,
-            self.screen_h / 2,
+            self.screen_h / 3,
             size="title",
         )
 
@@ -533,6 +536,12 @@ class Game:
                 # Advance turn
                 self.turn_is_white = not self.turn_is_white
 
+    def handle_finished_event(self, event):
+        btn_clicked = self.detect_button_click(event, 1)
+        if btn_clicked == 0:
+            # Restart game
+            self.set_state("home")
+
     def handle_event(self, event):
         if self.state == "home":
             self.handle_home_event(event)
@@ -543,8 +552,7 @@ class Game:
         elif self.state == "playing":
             self.handle_game_event(event)
         elif self.state == "finished":
-            # self.handle_finished_event(event)
-            pass
+            self.handle_finished_event(event)
         else:
             raise ValueError(f"Unknown state {self.state}")
 
