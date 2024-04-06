@@ -36,7 +36,13 @@ class HexChessBoard:
         os.makedirs(save_dir, exist_ok=True)
         self.save_dir = save_dir
         self.save_prob = save_prob
-
+        self.reset(initialize_empty, initialize_random)
+    
+    def reset(
+        self,
+        initialize_empty=False,
+        initialize_random=False,
+    ):
         # Initialize game
         self.initialize_board(
             empty_board=initialize_empty,

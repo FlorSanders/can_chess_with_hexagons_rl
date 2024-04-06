@@ -1,6 +1,9 @@
 import os
 import numpy as np
+import re
 import matplotlib.pyplot as plt
+from tqdm import tqdm
+from concurrent.futures import ProcessPoolExecutor
 
 
 def windowed_average(data, window_size, padding_type="reflect"):
@@ -105,3 +108,11 @@ def plot_episode_rewards(episode_rewards, kernel_size=25, save_path=None):
     if save_path is not None:
         fig.savefig(save_path, dpi=300, facecolor="white")
     return fig, ax
+
+
+def make_safe_filename(filename):
+    # Define a regular expression to remove characters not allowed in filenames
+    safe_chars = re.compile(r'[^a-zA-Z0-9_.-]')
+    # Replace disallowed characters with underscores
+    safe_filename = re.sub(safe_chars, '_', filename)
+    return safe_filename

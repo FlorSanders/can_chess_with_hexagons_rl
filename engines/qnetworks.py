@@ -14,7 +14,7 @@ from .environment import HexChessEnv
 class QNetworkPlayer(Player):
     name = "DQN Player"
 
-    def __init__(self, board, is_white, model_name="randomgreedy_pr", is_large=False):
+    def __init__(self, board, is_white, model_name="randomgreedygreedy_pr", is_large=True):
         # Initialize player class
         super().__init__(board, is_white)
 
@@ -23,7 +23,7 @@ class QNetworkPlayer(Player):
         self.color = "white" if is_white else "black"
         self.is_large = "_large" if is_large else ""
         cwd = os.path.join(os.path.dirname(__file__), "..")
-        model_file = f"{self.model_name}_{self.color}{self.is_large}.keras"
+        model_file = f"{self.model_name}_{self.color}{self.is_large}"
         self.model_path = os.path.join(cwd, "assets", "qnetworks", model_file)
         self.agent = QNetworkAgent(model_path=self.model_path, is_large=is_large)
 
@@ -211,7 +211,7 @@ class QNetworkAgent:
         new_states = np.asarray(new_states)
 
         # Keep track of TD losses
-        td_losses = np.zeros_like(rewards)
+        td_losses = np.zeros_like(rewards, dtype=np.float64)
 
         # Q predictions for the new states using fixed model
         q_target = rewards + self.gamma * np.max(
@@ -224,12 +224,18 @@ class QNetworkAgent:
 
         # For any move we have actually seen, correct the prediction
         for action_index, action in enumerate(actions):
-            # TD loss for the current action
-            td_losses[action_index] = (
-                q_state[action_index, action[0], action[1]] - q_target[action_index]
-            )
-            # Update the prediction for the current action
-            q_state[action_index, action[0], action[1]] = q_target[action_index]
+            try:
+                # TD loss for the current action
+                td_losses[action_index] = (
+                    q_state[action_index, action[0], action[1]] - q_target[action_index]
+                )
+                # Update the prediction for the current action
+                q_state[action_index, action[0], action[1]] = q_target[action_index]
+            except Exception as err:
+                print("Error detected")
+                print(q_target[action_index])
+                print(q_state[action_index, action[0], action[1]])
+                raise err
         q_state = np.reshape(q_state, (-1, 91 * 91))  # batch_size x 8281
 
         # Minibatch gradient descent step
@@ -405,9 +411,9 @@ class QLearning:
         - minibatch_indices (list): The indices of the samples in the memory.
         """
         # Actual batch size
-        batch_size = min(batch_size, len(self.memory))
+        assert len(self.memory) >= batch_size
         # Obtain random entries from our experience history
-        probs = np.array(self.memory_probs)
+        probs = np.array(self.memory_probs, dtype=np.float64)
         minibatch_indices = np.random.choice(
             len(self.memory), batch_size, replace=True, p=probs / np.sum(probs)
         )
@@ -429,7 +435,7 @@ class QLearning:
         self.update_memory(sars_tuple)
 
         # 2) Check if enough experiences were acquired
-        if len(self.memory) < step_index:
+        if len(self.memory) < batch_size:
             return
 
         # 3) Sample a minibatch of samples from the memory
