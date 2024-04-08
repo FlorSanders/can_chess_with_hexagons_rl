@@ -1,5 +1,8 @@
-,Random (baseline),Greedy (baseline),DQN (random),DQN (random + greedy)
-Random (baseline),4,0,2,1
-Greedy (baseline),10,9,10,9
-DQN (random),4,2,0,0
-DQN (random + greedy),3,2,0,0
+,Random (baseline),Greedy (baseline),DQN small (random),DQN small (random + greedy),DQN large (random),DQN large (random + greedy),DQN large (random + greedy-2)
+Random (baseline),368,2,164,271,283,205,172
+Greedy (baseline),1000,444,963,986,973,965,948
+DQN small (random),450,43,0,0,0,0,1000
+DQN small (random + greedy),475,27,0,0,0,0,0
+DQN large (random),382,9,0,0,0,1000,0
+DQN large (random + greedy),527,4,0,0,1000,0,0
+DQN large (random + greedy-2),295,0,0,0,0,0,0

@@ -1,0 +1,8 @@
+""
+Random (baseline)
+Greedy (baseline)
+DQN small (random)
+DQN small (random + greedy)
+DQN large (random)
+DQN large (random + greedy)
+DQN large (random + greedy-2)
