@@ -4,6 +4,7 @@ import random
 import os
 import logging
 from hexchess.board import HexChessBoard
+from hexchess.pieces import Pawn, Rook, Knight, Bishop, Queen, King
 from hexchess.utils import hexagon_dimensions, hexagon_points, qr_to_xy, xy_to_qr
 from hexchess.players import RandomPlayer, GreedyPlayer
 
@@ -12,11 +13,11 @@ logger = logging.getLogger(__name__)
 
 class Game:
     colors = {
-        0: "#d18b47",  # Dark
-        1: "#eead6f",  # Medium
-        2: "#ffcf9f",  # Light
-        "active": "#c9cbe0",
-        "green": "#d0dbb2",
+        0: "#188EAC",  # Dark
+        1: "#79A2B4",  # Medium
+        2: "#d4e5ef",  # Light
+        "active": "#C6878F",
+        "green": "#A2AD59",
     }
     states = [
         "home",
@@ -69,11 +70,12 @@ class Game:
         self.fps = 15
 
         # Define fonts
-        self.text_font = pygame.font.SysFont("Fira Sans Medium", 35)
-        self.title_font = pygame.font.SysFont("Fira Sans Medium", 50)
+        self.text_font = pygame.font.SysFont("Maven Pro", 30)
+        self.title_font = pygame.font.SysFont("Maven Pro", 40)
 
         # Define element sizes
         self.asset_size = 50
+        self.logo_size = 250
         self.hex_size = 35
         self.button_w = 400
         self.button_h = 50
@@ -109,6 +111,11 @@ class Game:
                     piece_asset, (self.asset_size, self.asset_size)
                 )
                 self.assets[f"{piece}_{color}"] = piece_asset
+        logo_asset = pygame.image.load(os.path.join(self.assets_dir, "logo.png"))
+        logo_asset = pygame.transform.scale(
+            logo_asset, (self.logo_size, self.logo_size)
+        )
+        self.assets["logo"] = logo_asset
 
     def draw_piece(self, piece, x_c, y_c):
         """
@@ -263,6 +270,15 @@ class Game:
         # Draw title
         self.draw_title()
 
+        # Draw logo
+        self.screen.blit(
+            self.assets["logo"],
+            (
+                self.screen_w // 2 - self.logo_size // 2,
+                80,
+            ),
+        )
+
         # Draw 1 player & 2 player buttons
         self.draw_buttons(["1 Player Game", "2 Player Game"])
 
@@ -396,7 +412,7 @@ class Game:
         self.legal_moves = []
 
         # Initialize board
-        self.board = HexChessBoard()
+        self.board = HexChessBoard(initialize_empty=False)
 
         # Initialize NPC if single player game
         if not self.two_player:
