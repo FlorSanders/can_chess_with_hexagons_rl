@@ -1,8 +1,6 @@
-,Random (baseline),Greedy (baseline),DQN small (random),DQN small (random + greedy),DQN large (random),DQN large (random + greedy),DQN large (random + greedy-2)
-Random (baseline),285,0,202,384,358,236,209
-Greedy (baseline),0,2,0,0,1,0,0
-DQN small (random),245,0,1000,1000,1000,0,0
-DQN small (random + greedy),293,0,0,1000,1000,1000,0
-DQN large (random),299,0,1000,0,1000,0,1000
-DQN large (random + greedy),261,0,1000,1000,0,1000,1000
-DQN large (random + greedy-2),398,0,0,1000,1000,1000,0
+,Random (baseline),Greedy (baseline),Deep Q Learning,Simple Actor Critic,Advanced Actor Critic
+Random (baseline),25,0,18,64,50
+Greedy (baseline),0,0,0,0,0
+Deep Q Learning,35,0,0,100,100
+Simple Actor Critic,44,0,100,100,100
+Advanced Actor Critic,29,0,100,100,100
