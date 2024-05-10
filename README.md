@@ -1,4 +1,8 @@
-# Can Chess, With Hexagons? A Reinforcement Learning Exploration.
+<div align="center">
+   <img src="hexchess/assets/logo.png" alt="HexChessLogo" width="320" height="320" >
+   <h1 align="center">Can Chess, With Hexagons?</h1>
+   <h3 align="center" style="font-style: italic;">A Reinforcement Learning Exploration.</h3>
+</div>
 
 ## Introduction
 
@@ -36,29 +40,11 @@ Some of the more intricate rules of the game are still missing, being:
 
 ## Reinforcement Learning
 
-TODO
+We implemented and trained the following models in this project.
 
-### Models
-
-- [ ] Q networks
-  - [x] Development
-  - [ ] Training (TODO train white) -> March 21st
-  - [ ] Game integration -> March 21st
-- [ ] Advantage Actor Critic (A2C) -> March 31st
-  - [ ] Development
-  - [ ] Training
-  - [ ] Game integration
-- [ ] Soft Actor Critic -> April 15th
-  - [ ] Development
-  - [ ] Training
-  - [ ] Game integration
-- [ ] Monte Carlo Tree Search
-  - [ ] Development
-  - [ ] Training
-  - [ ] Game integration
-- [ ] Model Evaluation Notebook -> March 24th
-- [ ] Report -> May 3rd
-- [ ] Final Presentation -> May 3rd
+- Deep Q Learning
+- Simple Actor-Critic
+- Advanced Actor Critic
 
 ## Sources
 
@@ -71,18 +57,5 @@ These are some useful references I have used during the development of this proj
   - [Demo](https://amethystmoon.github.io/)
 - [Chess Pygame Implementation Tutorial](https://www.youtube.com/watch?v=X-e0jk4I938)
 - [Reinforcement Learning for Chess](https://github.com/arjangroen/RLC)
-
-Advantage Actor Critic (A2C)
-https://arxiv.org/abs/1602.01783
-https://towardsdatascience.com/understanding-actor-critic-methods-931b97b6df3f
-
-Soft Actor Critic (for Discrete Action Spaces)
-https://arxiv.org/abs/1910.07207
-https://arxiv.org/abs/1801.01290
-https://spinningup.openai.com/en/latest/algorithms/sac.html#
-https://towardsdatascience.com/adapting-soft-actor-critic-for-discrete-action-spaces-a20614d4a50a
-
-## Potential Avenues for Improvement
-
-- Can we have the model learn the representation for states and actions instead of using the one-hot encoded representation?
--
+- [Advantage Actor Critic (A2C)](https://arxiv.org/abs/1602.01783)
+- [Soft Actor Critic](https://arxiv.org/abs/1910.07207), [2](https://arxiv.org/abs/1801.01290)
