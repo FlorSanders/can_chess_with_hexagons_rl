@@ -46,6 +46,8 @@ We implemented and trained the following models in this project.
 - Simple Actor-Critic
 - Advanced Actor Critic
 
+More details can be found in the [slides](./slides.pdf) included in the repository.
+
 ## Sources
 
 These are some useful references I have used during the development of this project.
